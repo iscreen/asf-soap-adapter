@@ -213,17 +213,16 @@ module ActiveRecord
       # for this, but does not distinguish between database connections, which
       # prevents opening transactions to two different databases at the same
       # time.
-      def transaction_with_nesting_support(*args, &block)
+      def transaction(*args, &block)
         open = Thread.current["open_transactions_for_#{self.class.name.underscore}"] ||= 0
         Thread.current["open_transactions_for_#{self.class.name.underscore}"] = open + 1
 
         begin
-          transaction_without_nesting_support(&block)
+          super(&block)
         ensure
           Thread.current["open_transactions_for_#{self.class.name.underscore}"] -= 1
         end
       end
-      alias_method_chain :transaction, :nesting_support
 
       # Begins the transaction (and turns off auto-committing).
       def begin_db_transaction
